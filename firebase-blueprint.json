@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "Employee": {
+      "title": "Employee",
+      "description": "Un employé du personnel.",
+      "type": "object",
+      "properties": {
+        "nom": {
+          "type": "string",
+          "description": "Le nom complet de l'employé."
+        }
+      },
+      "required": ["nom"]
+    },
+    "Pointage": {
+      "title": "Pointage",
+      "description": "Un enregistrement d'heures travaillées.",
+      "type": "object",
+      "properties": {
+        "employe_id": {
+          "type": "string",
+          "description": "L'ID de l'employé concerné."
+        },
+        "heures": {
+          "type": "number",
+          "description": "Le nombre d'heures travaillées."
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Le timestamp du pointage."
+        }
+      },
+      "required": ["employe_id", "heures", "date"]
+    },
+    "Config": {
+      "title": "Config",
+      "description": "Paramètres globaux de l'entreprise.",
+      "type": "object",
+      "properties": {
+        "taux_horaire": {
+          "type": "number",
+          "description": "Taux horaire de base en FCFA."
+        },
+        "deduction": {
+          "type": "number",
+          "description": "Pourcentage de déduction (0.0 à 1.0)."
+        }
+      },
+      "required": ["taux_horaire", "deduction"]
+    }
+  },
+  "firestore": {
+    "employees": {
+      "schema": "Employee",
+      "description": "Collection des employés."
+    },
+    "pointages": {
+      "schema": "Pointage",
+      "description": "Collection des pointages horaires."
+    },
+    "settings/config": {
+      "schema": "Config",
+      "description": "Document unique de configuration."
+    }
+  }
+}

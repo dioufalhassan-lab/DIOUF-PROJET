@@ -1,0 +1,11 @@
+{
+  "name": "Remix: Pointage \u0026 Salaire PRO",
+  "description": "Système complet de gestion du pointage et des salaires avec analyse financière par IA (Gemini).",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "AI Financial Assistant",
+    "Performance Art Generator"
+  ]
+}

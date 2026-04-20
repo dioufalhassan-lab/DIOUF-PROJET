@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: employees
+    //   - nom: string (required)
+    //
+    // Collection: pointages
+    //   - employe_id: string (required, reference to employees)
+    //   - heures: number (required, > 0)
+    //   - date: timestamp (required)
+    //
+    // Document: settings/config
+    //   - taux_horaire: number (required, >= 0)
+    //   - deduction: number (required, 0 to 1)
+    //
+    // Collection: users
+    //   - role: string ('admin' or 'user')
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "djipino63@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isPositive(field) {
+      return request.resource.data[field] is number && request.resource.data[field] > 0;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidEmployee(data) {
+      return data.nom is string && data.nom.size() > 0 && data.nom.size() < 100;
+    }
+
+    function isValidPointage(data) {
+      return data.employe_id is string && 
+             data.heures is number && data.heures > 0 && data.heures <= 24 &&
+             data.date is timestamp;
+    }
+
+    function isValidConfig(data) {
+      return data.taux_horaire is number && data.taux_horaire >= 0 &&
+             data.deduction is number && data.deduction >= 0 && data.deduction <= 1;
+    }
+
+    match /employees/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidEmployee(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /pointages/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidPointage(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /settings/config {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidConfig(request.resource.data);
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+  }
+}
